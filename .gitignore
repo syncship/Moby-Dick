@@ -2,10 +2,6 @@
 **/config.json
 **/.env
 
-# database files
-*.db
-*.db-journal
-
 # Binaries for programs and plugins
 *.exe
 *.exe~
