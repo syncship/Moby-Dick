@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -28,7 +29,14 @@ type Command struct {
 }
 
 // Arguments ..
-type Arguments map[string]typeguard.ArgumentConstructor
+type Arguments map[string]ArgumentConstructor
+
+// ArgumentConstructor ..
+type ArgumentConstructor struct {
+	To       string
+	Required bool
+	Output   typeguard.Output
+}
 
 // Callback ..
 type Callback func(s *discordgo.Session, m *discordgo.MessageCreate, a Arguments)
@@ -75,6 +83,14 @@ func (r *Router) parseCommand(
 		return cmd, errors.New(executioner.ErrNoPermission)
 	}
 
+	// Stores which args are required for given command
+	requiredArgs := []string{}
+	for k := range cmd.Args {
+		if cmd.Args[k].Required {
+			requiredArgs = append(requiredArgs, k)
+		}
+	}
+
 	// Resets command args
 	tempArgs := []string{}
 
@@ -82,24 +98,38 @@ func (r *Router) parseCommand(
 		if strings.HasPrefix(s, r.argPrefix) {
 			argName := strings.TrimPrefix(s, r.argPrefix)
 
+			foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
+			if foundRequiredArg < len(requiredArgs) &&
+				requiredArgs[foundRequiredArg] == argName {
+				requiredArgs = helper.RemoveString(requiredArgs, argName)
+			}
+
 			if arg, ok := cmd.Args[argName]; ok {
 				switch arg.To {
 				case typeguard.WantInt():
-					if len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrTooManyValues, argName)
+					if len(tempArgs) == 0 || len(tempArgs) > 1 {
+						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
 					}
 
 					arg.Output.Value = tempArgs[0]
 
 				case typeguard.WantArrInt():
+					if len(tempArgs) == 0 {
+						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+					}
+
 					arg.Output.Value = strings.Join(tempArgs, ",")
 
 				case typeguard.WantArrString():
+					if len(tempArgs) == 0 {
+						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+					}
+
 					arg.Output.Value = strings.Join(tempArgs, ",")
 
 				default:
-					if len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrTooManyValues, argName)
+					if len(tempArgs) == 0 || len(tempArgs) > 1 {
+						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
 					}
 
 					arg.Output.Value = tempArgs[0]
@@ -110,6 +140,10 @@ func (r *Router) parseCommand(
 		}
 
 		tempArgs = append(tempArgs, s)
+	}
+
+	if len(requiredArgs) > 0 {
+		return cmd, fmt.Errorf(executioner.ErrMissingRequiredArgs, requiredArgs)
 	}
 
 	return cmd, nil
@@ -129,4 +163,12 @@ func (r *Router) OnMessageCreateHandler(s *discordgo.Session, m *discordgo.Messa
 	}
 
 	cmd.Run(s, m, cmd.Args)
+
+	// Resets cmd arguments
+	for k := range cmd.Args {
+		arg := cmd.Args[k]
+		arg.Output.Value = ""
+
+		cmd.Args[k] = arg
+	}
 }

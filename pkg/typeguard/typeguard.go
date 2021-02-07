@@ -6,15 +6,10 @@ import (
 	"strings"
 )
 
-// ArgumentConstructor ..
-type ArgumentConstructor struct {
-	To     string
-	Output Output
-}
-
 // Output ..
 type Output struct {
-	Value string
+	Value   string
+	Default interface{}
 }
 
 // WantArrString returns string for type []string
@@ -24,6 +19,10 @@ func WantArrString() string {
 
 // ToArrString returns value of type []string
 func (o Output) ToArrString() (output []string, err error) {
+	if o.Value == "" {
+		return o.Default.([]string), nil
+	}
+
 	output = strings.Split(o.Value, ",")
 
 	return output, err
@@ -36,6 +35,10 @@ func WantInt() string {
 
 // ToInt returns value of type int
 func (o Output) ToInt() (output int, err error) {
+	if o.Value == "" {
+		return o.Default.(int), nil
+	}
+
 	output, err = strconv.Atoi(o.Value)
 
 	return output, err
@@ -48,6 +51,10 @@ func WantArrInt() string {
 
 // ToArrInt returns value of type []int
 func (o Output) ToArrInt() (output []int, err error) {
+	if o.Value == "" {
+		return o.Default.([]int), nil
+	}
+
 	arrStrings := strings.Split(o.Value, ",")
 
 	for i := 0; i < len(arrStrings); i++ {
