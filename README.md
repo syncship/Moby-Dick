@@ -1,2 +1,5 @@
 # Moby-Dick
-a bot with good literary reference
+A bot with good literary reference.
+
+
+WIP..
