@@ -1,8 +1,6 @@
 package router
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -72,7 +70,7 @@ func (r *Router) parseCommand(
 
 	cmd, ok := r.Commands[name]
 	if !ok {
-		return cmd, errors.New(executioner.ErrCommandNotFound)
+		return cmd, executioner.ErrCommandNotFound{Command: name}
 	}
 
 	// Checks user permission
@@ -80,7 +78,7 @@ func (r *Router) parseCommand(
 
 	if err != nil || (p&int64(helper.Sum(cmd.Permissions)) !=
 		int64(helper.Sum(cmd.Permissions))) {
-		return cmd, errors.New(executioner.ErrNoPermission)
+		return cmd, executioner.ErrNoPermission{}
 	}
 
 	// Stores which args are required for given command
@@ -95,55 +93,60 @@ func (r *Router) parseCommand(
 	tempArgs := []string{}
 
 	for _, s := range helper.Reverse(ctx) {
-		if strings.HasPrefix(s, r.argPrefix) {
-			argName := strings.TrimPrefix(s, r.argPrefix)
-
-			foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
-			if foundRequiredArg < len(requiredArgs) &&
-				requiredArgs[foundRequiredArg] == argName {
-				requiredArgs = helper.RemoveString(requiredArgs, argName)
-			}
-
-			if arg, ok := cmd.Args[argName]; ok {
-				switch arg.To {
-				case typeguard.WantInt():
-					if len(tempArgs) == 0 || len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = tempArgs[0]
-
-				case typeguard.WantArrInt():
-					if len(tempArgs) == 0 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = strings.Join(tempArgs, ",")
-
-				case typeguard.WantArrString():
-					if len(tempArgs) == 0 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = strings.Join(tempArgs, ",")
-
-				default:
-					if len(tempArgs) == 0 || len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = tempArgs[0]
-				}
-
-				cmd.Args[argName] = arg
-			}
+		if !strings.HasPrefix(s, r.argPrefix) {
+			tempArgs = append(tempArgs, s)
+			continue
 		}
+		argName := strings.TrimPrefix(s, r.argPrefix)
+
+		foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
+		if foundRequiredArg < len(requiredArgs) &&
+			requiredArgs[foundRequiredArg] == argName {
+			requiredArgs = helper.RemoveString(requiredArgs, argName)
+		}
+
+		arg, ok := cmd.Args[argName]
+		if !ok {
+			tempArgs = append(tempArgs, s)
+			continue
+		}
+		switch arg.To {
+		case typeguard.WantInt():
+			if len(tempArgs) != 1 {
+				return cmd, executioner.ErrValuesOutOfBounds{ArgName: argName}
+			}
+
+			arg.Output.Value = tempArgs[0]
+
+		case typeguard.WantArrInt():
+			if len(tempArgs) == 0 {
+				return cmd, executioner.ErrValuesOutOfBounds{ArgName: argName}
+			}
+
+			arg.Output.Value = strings.Join(tempArgs, ",")
+
+		case typeguard.WantArrString():
+			if len(tempArgs) == 0 {
+				return cmd, executioner.ErrValuesOutOfBounds{ArgName: argName}
+			}
+
+			arg.Output.Value = strings.Join(tempArgs, ",")
+
+		default:
+			if len(tempArgs) != 1 {
+				return cmd, executioner.ErrValuesOutOfBounds{ArgName: argName}
+			}
+
+			arg.Output.Value = tempArgs[0]
+		}
+
+		cmd.Args[argName] = arg
 
 		tempArgs = append(tempArgs, s)
 	}
 
 	if len(requiredArgs) > 0 {
-		return cmd, fmt.Errorf(executioner.ErrMissingRequiredArgs, requiredArgs)
+		return cmd, executioner.ErrMissingRequiredArgs{Args: requiredArgs}
 	}
 
 	return cmd, nil

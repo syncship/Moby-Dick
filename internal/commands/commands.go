@@ -7,7 +7,7 @@ import (
 )
 
 // MentionRegex ...
-var MentionRegex = regexp.MustCompile("<(@!?\\d+)>")
+var MentionRegex = regexp.MustCompile(`<(@!?\d+)>`)
 
 // Router ...
 var Router = router.New()

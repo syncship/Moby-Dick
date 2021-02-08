@@ -1,14 +1,18 @@
 package helper
 
 // RemoveString returns []string with the given `r` removed from it
+// TODO: remove comment, isto tava alterando o slice original s []string
+// pode ser a intençao mas geralmente nao é
 func RemoveString(s []string, r string) []string {
-	for i, v := range s {
+	ret := make([]string, 0, len(s))
+	for _, v := range s {
 		if v == r {
-			return append(s[:i], s[i+1:]...)
+			continue
 		}
+		ret = append(ret, v)
 	}
 
-	return s
+	return ret
 }
 
 // Reverse returns a reversed []string
