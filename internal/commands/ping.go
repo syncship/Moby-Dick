@@ -30,7 +30,6 @@ func init() {
 				s.ChannelMessageSend(m.ChannelID, "p-pong :flushed:")
 			}
 		},
-		Permissions: []int{discordgo.PermissionAdministrator},
-		// Permissions: []int{discordgo.PermissionSendMessages},
+		Permissions: []int{discordgo.PermissionSendMessages},
 	})
 }
