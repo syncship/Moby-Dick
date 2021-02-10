@@ -76,7 +76,7 @@ func (r *Router) parseCommand(
 	}
 
 	// Checks user permission
-	p, err := s.State.UserChannelPermissions(m.Author.ID, m.ChannelID)
+	p, err := s.State.MessagePermissions(m.Message)
 
 	if err != nil || (p&int64(helper.Sum(cmd.Permissions)) !=
 		int64(helper.Sum(cmd.Permissions))) {
@@ -95,51 +95,52 @@ func (r *Router) parseCommand(
 	tempArgs := []string{}
 
 	for _, s := range helper.Reverse(ctx) {
-		if strings.HasPrefix(s, r.argPrefix) {
-			argName := strings.TrimPrefix(s, r.argPrefix)
-
-			foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
-			if foundRequiredArg < len(requiredArgs) &&
-				requiredArgs[foundRequiredArg] == argName {
-				requiredArgs = helper.RemoveString(requiredArgs, argName)
-			}
-
-			if arg, ok := cmd.Args[argName]; ok {
-				switch arg.To {
-				case typeguard.WantInt():
-					if len(tempArgs) == 0 || len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = tempArgs[0]
-
-				case typeguard.WantArrInt():
-					if len(tempArgs) == 0 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = strings.Join(tempArgs, ",")
-
-				case typeguard.WantArrString():
-					if len(tempArgs) == 0 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = strings.Join(tempArgs, ",")
-
-				default:
-					if len(tempArgs) == 0 || len(tempArgs) > 1 {
-						return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-					}
-
-					arg.Output.Value = tempArgs[0]
-				}
-
-				cmd.Args[argName] = arg
-			}
+		if !strings.HasPrefix(s, r.argPrefix) {
+			tempArgs = append(tempArgs, s)
+			continue
 		}
 
-		tempArgs = append(tempArgs, s)
+		argName := strings.TrimPrefix(s, r.argPrefix)
+
+		foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
+		if foundRequiredArg < len(requiredArgs) &&
+			requiredArgs[foundRequiredArg] == argName {
+			requiredArgs = helper.RemoveString(requiredArgs, argName)
+		}
+
+		if arg, ok := cmd.Args[argName]; ok {
+			switch arg.To {
+			case typeguard.WantInt():
+				if len(tempArgs) == 0 || len(tempArgs) > 1 {
+					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+				}
+
+				arg.Output.Value = tempArgs[0]
+
+			case typeguard.WantArrInt():
+				if len(tempArgs) == 0 {
+					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+				}
+
+				arg.Output.Value = strings.Join(tempArgs, ",")
+
+			case typeguard.WantArrString():
+				if len(tempArgs) == 0 {
+					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+				}
+
+				arg.Output.Value = strings.Join(tempArgs, ",")
+
+			default:
+				if len(tempArgs) == 0 || len(tempArgs) > 1 {
+					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
+				}
+
+				arg.Output.Value = tempArgs[0]
+			}
+
+			cmd.Args[argName] = arg
+		}
 	}
 
 	if len(requiredArgs) > 0 {
