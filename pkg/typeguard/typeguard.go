@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+var (
+	arrStringsType = reflect.TypeOf([]string{}).Name()
+	arrIntsType    = reflect.TypeOf([]int{}).Name()
+	intType        = reflect.TypeOf(1).Name()
+)
+
 // Output ..
 type Output struct {
 	Value   string
@@ -14,7 +20,7 @@ type Output struct {
 
 // WantArrString returns string for type []string
 func WantArrString() string {
-	return reflect.TypeOf([]string{}).Name()
+	return arrStringsType
 }
 
 // ToArrString returns value of type []string
@@ -30,7 +36,7 @@ func (o Output) ToArrString() (output []string, err error) {
 
 // WantInt returns string for type int
 func WantInt() string {
-	return reflect.TypeOf(1).Name()
+	return intType
 }
 
 // ToInt returns value of type int
@@ -46,7 +52,7 @@ func (o Output) ToInt() (output int, err error) {
 
 // WantArrInt returns string for type []int
 func WantArrInt() string {
-	return reflect.TypeOf([]int{}).Name()
+	return arrIntsType
 }
 
 // ToArrInt returns value of type []int
