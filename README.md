@@ -1,5 +1,9 @@
 # Moby-Dick
-A bot with good literary reference.
+Esse projeto usa a versão Go >= 1.15
 
+#### Como rodar
+* Criar um arquivo `.env` seguindo o exemplo do `.env.example`.
+* Rodar o bot com `go run .`
 
-WIP..
+#### Como contribuir
+WIP ..
