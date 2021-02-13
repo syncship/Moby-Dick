@@ -1,8 +1,6 @@
 package router
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"sort"
 	"strings"
@@ -28,17 +26,17 @@ type Command struct {
 	Permissions []int
 }
 
-// Arguments ..
+// Arguments defines the structure of a collection of arguments
 type Arguments map[string]ArgumentConstructor
 
-// ArgumentConstructor ..
+// ArgumentConstructor defines the structure of an argument
 type ArgumentConstructor struct {
 	To       string
 	Required bool
 	Output   typeguard.Output
 }
 
-// Callback ..
+// Callback defines the structure of the callback function for a command
 type Callback func(s *discordgo.Session, m *discordgo.MessageCreate, a Arguments)
 
 // New returns a new Router
@@ -72,7 +70,7 @@ func (r *Router) parseCommand(
 
 	cmd, ok := r.Commands[name]
 	if !ok {
-		return cmd, errors.New(executioner.ErrCommandNotFound)
+		return cmd, &executioner.ErrCommandNotFound{}
 	}
 
 	// Checks user permission
@@ -80,7 +78,7 @@ func (r *Router) parseCommand(
 
 	if err != nil || (p&int64(helper.Sum(cmd.Permissions)) !=
 		int64(helper.Sum(cmd.Permissions))) {
-		return cmd, errors.New(executioner.ErrNoPermission)
+		return cmd, &executioner.ErrNoPermission{}
 	}
 
 	// Stores which args are required for given command
@@ -101,50 +99,52 @@ func (r *Router) parseCommand(
 		}
 
 		argName := strings.TrimPrefix(s, r.argPrefix)
-
 		foundRequiredArg := sort.SearchStrings(requiredArgs, argName)
-		if foundRequiredArg < len(requiredArgs) &&
-			requiredArgs[foundRequiredArg] == argName {
+
+		if foundRequiredArg < len(requiredArgs) && requiredArgs[foundRequiredArg] == argName {
 			requiredArgs = helper.RemoveString(requiredArgs, argName)
 		}
 
-		if arg, ok := cmd.Args[argName]; ok {
-			switch arg.To {
-			case typeguard.WantInt():
-				if len(tempArgs) == 0 || len(tempArgs) > 1 {
-					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-				}
+		arg, ok := cmd.Args[argName]
+		if !ok {
+			continue
+		}
 
-				arg.Output.Value = tempArgs[0]
-
-			case typeguard.WantArrInt():
-				if len(tempArgs) == 0 {
-					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-				}
-
-				arg.Output.Value = strings.Join(tempArgs, ",")
-
-			case typeguard.WantArrString():
-				if len(tempArgs) == 0 {
-					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-				}
-
-				arg.Output.Value = strings.Join(tempArgs, ",")
-
-			default:
-				if len(tempArgs) == 0 || len(tempArgs) > 1 {
-					return cmd, fmt.Errorf(executioner.ErrValuesOutOfBounds, argName)
-				}
-
-				arg.Output.Value = tempArgs[0]
+		switch arg.To {
+		case typeguard.WantInt():
+			if len(tempArgs) == 0 || len(tempArgs) > 1 {
+				return cmd, &executioner.ErrValuesOutOfBounds{Arg: argName}
 			}
 
-			cmd.Args[argName] = arg
+			arg.Output.Value = tempArgs[0]
+
+		case typeguard.WantArrInt():
+			if len(tempArgs) == 0 {
+				return cmd, &executioner.ErrValuesOutOfBounds{Arg: argName}
+			}
+
+			arg.Output.Value = strings.Join(tempArgs, ",")
+
+		case typeguard.WantArrString():
+			if len(tempArgs) == 0 {
+				return cmd, &executioner.ErrValuesOutOfBounds{Arg: argName}
+			}
+
+			arg.Output.Value = strings.Join(tempArgs, ",")
+
+		default:
+			if len(tempArgs) == 0 || len(tempArgs) > 1 {
+				return cmd, &executioner.ErrValuesOutOfBounds{Arg: argName}
+			}
+
+			arg.Output.Value = tempArgs[0]
 		}
+
+		cmd.Args[argName] = arg
 	}
 
 	if len(requiredArgs) > 0 {
-		return cmd, fmt.Errorf(executioner.ErrMissingRequiredArgs, requiredArgs)
+		return cmd, &executioner.ErrMissingRequiredArgs{Args: requiredArgs}
 	}
 
 	return cmd, nil
