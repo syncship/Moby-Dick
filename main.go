@@ -8,17 +8,9 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/joho/godotenv"
 
 	"github.com/syncship/moby-dick/internal/commands"
 )
-
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
 
 func main() {
 	client, err := discordgo.New("Bot " + os.Getenv("DISCORD_TOKEN"))
