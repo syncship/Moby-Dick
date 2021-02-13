@@ -7,3 +7,6 @@ Esse projeto usa a versão Go >= 1.15
 
 #### Como contribuir
 WIP ..
+
+#### Licença
+Esse repositório usa a licença  [AGPL-3.0](https://github.com/syncship/moby-dick/blob/master/LICENSE)
