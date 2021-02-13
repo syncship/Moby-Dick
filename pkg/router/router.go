@@ -75,9 +75,9 @@ func (r *Router) parseCommand(
 
 	// Checks user permission
 	p, err := s.State.MessagePermissions(m.Message)
+	permissions := int64(helper.Sum(cmd.Permissions))
 
-	if err != nil || (p&int64(helper.Sum(cmd.Permissions)) !=
-		int64(helper.Sum(cmd.Permissions))) {
+	if err != nil || p&permissions != permissions {
 		return cmd, &executioner.ErrNoPermission{}
 	}
 
