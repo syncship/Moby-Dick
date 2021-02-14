@@ -15,9 +15,11 @@ type Database struct {
 }
 
 func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	godotenv.Load()
+
+	token := os.Getenv("DISCORD_TOKEN")
+	if token == "" {
+		log.Fatalln("Could not find value for 'DISCORD_TOKEN', make sure you have a .env file or have setup the environment variables properly.")
 	}
 }
 
