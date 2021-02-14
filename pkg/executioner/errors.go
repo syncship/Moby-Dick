@@ -6,14 +6,14 @@ import "fmt"
 type ErrCommandNotFound struct{}
 
 func (e *ErrCommandNotFound) Error() string {
-	return fmt.Sprintf("Command not found")
+	return fmt.Sprintf("Não encontrei esse comando.")
 }
 
 // ErrNoPermission defines the error when a user does not have sufficient permission
 type ErrNoPermission struct{}
 
 func (e *ErrNoPermission) Error() string {
-	return fmt.Sprintf("You can't run this command")
+	return fmt.Sprintf("Você não tem permissão pra usar esse comando.")
 }
 
 // ErrValuesOutOfBounds defines the error when a user gives more values to an arg then required
@@ -22,7 +22,7 @@ type ErrValuesOutOfBounds struct {
 }
 
 func (e *ErrValuesOutOfBounds) Error() string {
-	return fmt.Sprintf("Values for argument '%s' are out of bounds", e.Arg)
+	return fmt.Sprintf("Valores pro argumento '%s' estão fora dos limites.", e.Arg)
 }
 
 // ErrMissingRequiredArgs defines the error when a user fails to provide all required args for a command
@@ -31,5 +31,5 @@ type ErrMissingRequiredArgs struct {
 }
 
 func (e *ErrMissingRequiredArgs) Error() string {
-	return fmt.Sprintf("You're missing required args: %s", e.Args)
+	return fmt.Sprintf("Você esqueceu de passar argumentos obrigatórios: %s", e.Args)
 }
