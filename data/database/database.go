@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 	"log"
+	"path"
 	"os"
 
 	"github.com/asdine/storm/v3"
@@ -26,7 +27,12 @@ func init() {
 // New returns a new instance of the database
 func New() *Database {
 	env := os.Getenv("ENVIRONMENT")
-	connection, err := storm.Open(fmt.Sprintf("./data/database/%s.db", env))
+	if env == "" {
+		env = "PROD"
+	}
+
+	p := path.Join(os.Getenv("DB_DIR"), fmt.Sprintf("%s.db", env))
+	connection, err := storm.Open(p)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
