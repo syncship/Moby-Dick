@@ -8,7 +8,7 @@ buildGoModule rec {
     owner = "syncship";
     repo = "moby-dick";
     rev = "${version}";
-    sha256 = "1fphd9xmc8j7n7vg3f0lcvpfr7fqvhng5va8pn7vw7k7ys4j64l1";
+    sha256 = "1fphd9xmc8j7n7vg3f0lcvpfr7fqvhng5va8pn7vw7k7ys4j64l2";
   };
 
   vendorSha256 = "0dxi1358bqjsfc8mivmkwvz35pdzb5icfkyczn7ylgdz0m9qc8p0";
