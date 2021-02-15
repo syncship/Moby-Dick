@@ -2,7 +2,7 @@
 
 buildGoModule rec {
   pname = "moby-dick";
-  version = "40c3e4f70ac7b50f35354b1c96ce345fa950d7da";
+  version = "3881b862e73323df5e8303e0d1a42e15ce0bae41";
 
   src = fetchFromGitHub {
     owner = "syncship";
