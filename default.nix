@@ -14,6 +14,8 @@ buildGoModule rec {
   vendorSha256 = "0dxi1358bqjsfc8mivmkwvz35pdzb5icfkyczn7ylgdz0m9qc8p0";
   modSha256 = "1879j77k96684wi554rkjxydrj8g3hpp0kvxz03sd8dmwr3lh83j";
 
+  Cmd = [ "moby-dick" ];
+
   meta = with lib; {
     description = "a bot with good literary reference";
     homepage = https://github.com/syncship/moby-dick;
