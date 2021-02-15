@@ -20,7 +20,7 @@ Esse projeto usa a versão Go >= 1.15
 * Rodar o bot com `go run .`
 
 #### Como contribuir
-WIP ..
+Faça um fork da `master`, mande as alterações pra sua branch e abra um PR para a branch `dev` seguindo o template gerado automaticamente. Seu PR estará elegível a ser aceito se seguir esse guia e passar pela rotina de testes do *Github Actions*.
 
 #### Licença
 Esse repositório usa a licença  [AGPL-3.0](https://github.com/syncship/moby-dick/blob/master/LICENSE)
