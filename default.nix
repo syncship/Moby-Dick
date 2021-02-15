@@ -2,13 +2,13 @@
 
 buildGoModule rec {
   pname = "moby-dick";
-  version = "3881b862e73323df5e8303e0d1a42e15ce0bae41";
+  version = "fdf0f1afd107c6a19804241c87ade18b01619615";
 
   src = fetchFromGitHub {
     owner = "syncship";
     repo = "moby-dick";
     rev = "${version}";
-    sha256 = "1fphd9xmc8j7n7vg3f0lcvpfr7fqvhng5va8pn7vw7k7ys4j64l2";
+    sha256 = "0c7q11jjadmiv5g776xlbqi709vpbcm21lzk8ycalay80shppr7d";
   };
 
   vendorSha256 = "0dxi1358bqjsfc8mivmkwvz35pdzb5icfkyczn7ylgdz0m9qc8p0";
