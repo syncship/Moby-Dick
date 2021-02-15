@@ -3,7 +3,7 @@ let moby-dick = import ./default.nix { };
 in
 dockerTools.buildImage {
   name = "moby-dick";
-  tag = "fdf0f1afd107c6a19804241c87ade18b01619615";
+  tag = "9a213bec1b81c0ed1a0bc7b854be4e678ae024d6";
   contents = [ moby-dick cacert ];
   
   config = {
