@@ -8,5 +8,8 @@ dockerTools.buildImage {
   
   config = {
     Cmd = [ "${moby-dick}/bin/moby-dick" ];
+    Env = [
+      "SSL_CERT_FILE=${cacert}/etc/ssl/certs/ca-bundle.crt"
+    ];
   };
 }
